@@ -11,7 +11,7 @@
 @interface SKViewController : UIViewController
 
 @property (nonatomic) UIScrollView *scrollView;
-
--(UIView *)addScoreView;
-
+@property (nonatomic) NSMutableArray *scoreLabels;
+- (UIView *)addScoreView:(int)index;
+- (void)scoreStepperValueDidChange:(id)sender;
 @end

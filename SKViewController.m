@@ -8,7 +8,7 @@
 
 #import "SKViewController.h"
 
-@interface SKViewController ()
+@interface SKViewController () <UITextFieldDelegate>
 
 @end
 
@@ -22,14 +22,21 @@
     self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame) * 2);
     self.scrollView.backgroundColor = [UIColor blackColor];
     [self.view addSubview:self.scrollView];
-    
-    [self.scrollView addSubview:[self addScoreView]];
-    
+	
+	self.scoreLabels = [NSMutableArray new];
+
+	[self.scrollView addSubview:[self addScoreView:0]];
+	
     self.title = @"Score Keeper";
     
 }
 
-- (UIView *)addScoreView
+- (bool) textFieldShouldReturn:(UITextField *)textField {
+	[textField resignFirstResponder];
+	return YES;
+}
+
+- (UIView *)addScoreView:(int)index
 {
     const CGFloat margin = 3;
     const CGFloat height = 44;
@@ -42,23 +49,38 @@
     //TextField
     UITextField *name = [[UITextField alloc] initWithFrame:CGRectMake(margin, margin, buttonWidth, height)];
     name.borderStyle = UITextBorderStyleRoundedRect;
+	name.delegate = self;
+	
     [view addSubview:name];
     
-    //Label
-    UILabel *score = [[UILabel alloc] initWithFrame:CGRectMake(margin * 2 +buttonWidth, margin, buttonWidth, height)];
-    score.text = @"hello";
-    score.backgroundColor = [UIColor greenColor];
-    [view addSubview:score];
-    
+	
     //Stepper
     UIStepper *button = [[UIStepper alloc] initWithFrame:CGRectMake(margin * 3 + buttonWidth * 2, 10, buttonWidth, height)];
+	button.minimumValue = 0;
+	button.maximumValue = 1000;
+	button.stepValue = 1;
+	button.tag = index;
     [view addSubview:button];
-    
-    NSLog(@"%f", buttonWidth);
-    
+	[button addTarget:self action:@selector(scoreStepperValueDidChange:) forControlEvents:UIControlEventValueChanged];
+	
+	//Label
+	UILabel *score = [[UILabel alloc] initWithFrame:CGRectMake(margin * 2 +buttonWidth, margin, buttonWidth, height)];
+	score.text = [NSString stringWithFormat:@"%d", (int)button.value];
+	score.backgroundColor = [UIColor greenColor];
+	[view addSubview:score];
+	[self.scoreLabels addObject:score];
+	
     return view;
 }
 
+
+
+- (void)scoreStepperValueDidChange:(id)sender {
+	UIStepper *stepper = (UIStepper *)sender;
+	NSInteger index = stepper.tag;
+	UILabel *label = [self.scoreLabels objectAtIndex:index];
+	label.text = [NSString stringWithFormat:@"%d",(int)stepper.value];
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
